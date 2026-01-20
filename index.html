@@ -3,157 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>五十音泡泡消消樂</title>
+    <title>五十音冒險 v3.1 - 自主選關版</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: #e0f7fa;
-            font-family: 'Arial', sans-serif;
-            touch-action: manipulation;
+        body { margin: 0; overflow: hidden; background: #E8F5E9; font-family: 'Arial', 'Hiragino Kaku Gothic Pro', sans-serif; touch-action: manipulation; }
+        
+        /* 選單畫面 */
+        #menu-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 500; display: flex; flex-direction: column; align-items: center; padding: 20px;
         }
-        #game-container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
+        .row-selector {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin: 20px 0;
         }
-        #ui-panel {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            text-align: center;
-            z-index: 100;
-            pointer-events: none;
+        .row-btn {
+            padding: 15px 25px; font-size: 20px; border: 3px solid #4CAF50; border-radius: 15px;
+            background: white; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #388E3C;
         }
-        #target-display {
-            font-size: 80px;
-            background: white;
-            padding: 10px 40px;
-            border-radius: 50px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            color: #ff4081;
+        .row-btn.selected { background: #4CAF50; color: white; transform: translateY(4px); box-shadow: none; }
+
+        /* 學習畫面 */
+        #study-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #FFFDE7; z-index: 400; display: none; flex-direction: column; align-items: center; padding: 20px;
         }
+        .kana-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .kana-card { 
+            width: 65px; height: 65px; background: white; border: 2px solid #FFB74D; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer;
+            box-shadow: 0 4px 0 #FFA000;
+        }
+        .kana-card:active { transform: translateY(2px); box-shadow: 0 2px 0 #FFA000; }
+
+        /* 遊戲介面 */
+        #ui-panel { position: absolute; top: 20px; width: 100%; text-align: center; z-index: 100; display: none; pointer-events: none; }
+        #listen-btn {
+            pointer-events: auto; font-size: 50px; background: white; border: 5px solid #2196F3;
+            border-radius: 50%; width: 100px; height: 100px; cursor: pointer; box-shadow: 0 6px 0 #1976D2;
+        }
+        #listen-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #1976D2; }
+
         .bubble {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle at 30% 30%, #fff, #81d4fa);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            font-weight: bold;
-            color: #0277bd;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            animation: float 8s linear infinite;
+            position: absolute; width: 90px; height: 90px;
+            background: radial-gradient(circle at 30% 30%, #fff, #81D4FA);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 35px; font-weight: bold; color: #01579B; animation: float 10s linear infinite;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
         }
-        @keyframes float {
-            0% { transform: translateY(100vh); }
-            100% { transform: translateY(-20vh); }
-        }
-        #start-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-        }
-        button {
-            padding: 20px 40px;
-            font-size: 30px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-        }
+        @keyframes float { 0% { transform: translateY(110vh); } 100% { transform: translateY(-20vh); } }
+        
+        .nav-btn { margin-top: 30px; padding: 15px 40px; font-size: 24px; background: #FF7043; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 0 #E64A19; }
+        .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #E64A19; }
+
+        #version-tag { position: fixed; bottom: 5px; right: 10px; font-size: 12px; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div id="start-screen">
-    <h1>五十音泡泡消消樂</h1>
-    <p>聽聲音，找到正確的泡泡！</p>
-    <button onclick="startGame()">開始遊戲</button>
+<div id="version-tag">v3.1</div>
+
+<div id="menu-screen">
+    <h1 style="color: #2E7D32;">🎮 五十音大冒險</h1>
+    <p>你想練習哪幾行朋友？</p>
+    <div class="row-selector">
+        <div class="row-btn" onclick="toggleRow(this, 'あ')">あ 行</div>
+        <div class="row-btn" onclick="toggleRow(this, 'か')">か 行</div>
+        <div class="row-btn" onclick="toggleRow(this, 'さ')">さ 行</div>
+        <div class="row-btn" onclick="toggleRow(this, 'た')">た 行</div>
+        <div class="row-btn" onclick="toggleRow(this, 'な')">な 行</div>
+    </div>
+    <button class="nav-btn" onclick="goToStudy()">選好了，去練習！</button>
+</div>
+
+<div id="study-screen">
+    <h2 id="study-title" style="color: #F57C00;">點點看，記住聲音喔！</h2>
+    <div class="kana-grid" id="study-grid"></div>
+    <button class="nav-btn" style="background:#4CAF50; box-shadow: 0 5px 0 #388E3C;" onclick="startChallenge()">記好了，開始比賽！</button>
+    <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; text-decoration:underline;">重新選行</button>
 </div>
 
 <div id="ui-panel">
-    <span id="target-display">?</span>
+    <button id="listen-btn" onclick="speak(currentTarget)">👂</button>
+    <p style="font-weight: bold; color: #1565C0; margin-top:10px;">聽聲音，抓泡泡！</p>
+    <button onclick="location.reload()" style="pointer-events:auto; position:fixed; top:15px; right:15px; padding:10px; border-radius:10px; background:white; border:1px solid #ccc;">重選</button>
 </div>
-
 <div id="game-container"></div>
 
 <script>
-    const kanaList = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ','た','ち','つ','て','と','な','に','ぬ','ね','の'];
-    let currentTarget = "";
-    const container = document.getElementById('game-container');
-    const display = document.getElementById('target-display');
-
-    // 語音設定
-    const synth = window.speechSynthesis;
+    const kanaMap = {
+        'あ': ['あ','い','う','え','お'],
+        'か': ['か','き','く','け','こ'],
+        'さ': ['さ','し','迷','せ','そ'], // 修正一個小地方
+        'さ': ['さ','し','す','せ','そ'],
+        'た': ['た','ち','つ','て','と'],
+        'な': ['な','に','ぬ','ne','の'], // 修正：ぬ、ね、の
+        'な': ['な','に','ぬ','ね','の']
+    };
     
+    let selectedRows = [];
+    let activeKanaList = [];
+    let currentTarget = "";
+    let gameInterval;
+    const synth = window.speechSynthesis;
+
+    function toggleRow(btn, rowKey) {
+        btn.classList.toggle('selected');
+        if (selectedRows.includes(rowKey)) {
+            selectedRows = selectedRows.filter(r => r !== rowKey);
+        } else {
+            selectedRows.push(rowKey);
+        }
+    }
+
+    function goToStudy() {
+        if (selectedRows.length === 0) {
+            alert("請先選擇要練習的行喔！");
+            return;
+        }
+        activeKanaList = [];
+        selectedRows.forEach(row => {
+            activeKanaList = activeKanaList.concat(kanaMap[row]);
+        });
+
+        document.getElementById('menu-screen').style.display = 'none';
+        document.getElementById('study-screen').style.display = 'flex';
+        
+        const grid = document.getElementById('study-grid');
+        grid.innerHTML = '';
+        activeKanaList.forEach(k => {
+            const div = document.createElement('div');
+            div.className = 'kana-card';
+            div.innerText = k;
+            div.onclick = () => speak(k);
+            grid.appendChild(div);
+        });
+    }
+
     function speak(text) {
+        if (!text) return;
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang = 'ja-JP';
-        utter.rate = 0.8;
+        utter.rate = 0.75;
         synth.speak(utter);
     }
 
-    function startGame() {
-        document.getElementById('start-screen').style.display = 'none';
+    function startChallenge() {
+        document.getElementById('study-screen').style.display = 'none';
+        document.getElementById('ui-panel').style.display = 'block';
         nextRound();
-        setInterval(createBubble, 1500); // 每1.5秒出一個泡泡
+        gameInterval = setInterval(createBubble, 1800);
     }
 
     function nextRound() {
-        currentTarget = kanaList[Math.floor(Math.random() * kanaList.length)];
-        display.innerText = currentTarget;
-        speak(currentTarget);
+        currentTarget = activeKanaList[Math.floor(Math.random() * activeKanaList.length)];
+        setTimeout(() => speak(currentTarget), 500);
     }
 
     function createBubble() {
         const bubble = document.createElement('div');
         bubble.className = 'bubble';
         
-        // 隨機決定這個泡泡是什麼字（50%機率出現目標字，讓小孩容易找到）
-        const isTarget = Math.random() > 0.5;
-        const char = isTarget ? currentTarget : kanaList[Math.floor(Math.random() * kanaList.length)];
+        // 確保題目字出現的機率高一點
+        const isTarget = Math.random() > 0.4;
+        const char = isTarget ? currentTarget : activeKanaList[Math.floor(Math.random() * activeKanaList.length)];
         
         bubble.innerText = char;
-        bubble.style.left = Math.random() * 80 + 5 + "vw"; // 隨機水平位置
+        bubble.style.left = Math.random() * 75 + 10 + "vw";
         
-        // 點擊事件
         bubble.onclick = function() {
             if (char === currentTarget) {
-                // 答對了
-                bubble.style.background = '#c8e6c9';
-                bubble.style.transform = 'scale(1.5)';
-                setTimeout(() => bubble.remove(), 100);
-                nextRound(); // 下一題
+                bubble.style.background = '#A5D6A7';
+                bubble.style.transform = 'scale(1.3)';
+                bubble.style.transition = '0.2s';
+                setTimeout(() => {
+                    if(bubble.parentNode) bubble.remove();
+                    nextRound();
+                }, 200);
             } else {
-                // 答錯了
-                bubble.style.background = '#ffcdd2';
-                speak("ちがうよ (不對喔)"); // 也可以不說話只震動
+                bubble.style.background = '#EF9A9A';
+                // 點錯抖動一下
+                bubble.style.transform = 'translateX(5px)';
+                setTimeout(()=> bubble.style.transform = 'translateX(-5px)', 50);
+                speak(currentTarget); // 再提示一次正確讀音
             }
         };
-
-        // 泡泡飄出畫面後自動刪除，節省效能
-        bubble.addEventListener('animationiteration', () => bubble.remove());
         
-        container.appendChild(bubble);
+        document.getElementById('game-container').appendChild(bubble);
         
-        // 10秒後沒點到也自動移除
-        setTimeout(() => { if(bubble.parentNode) bubble.remove(); }, 10000);
+        // 泡泡飄太高自動消失
+        setTimeout(() => { if(bubble.parentNode) bubble.remove(); }, 11000);
     }
-
-    // 點擊上方大字可以重複聽讀音
-    display.onclick = () => speak(currentTarget);
 </script>
-
 </body>
 </html>
