@@ -27,34 +27,43 @@
 
         #main-stage { flex-grow: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 20px; }
 
-        /* --- 核心修改：小八重聽按鈕 --- */
+        /* --- 小八重聽按鈕 (內嵌圖案版) --- */
         .quiz-hachiware {
-            width: 120px;
-            height: 120px;
-            background-image: url('https://i.imgur.com/vA170wE.png'); /* 動態感小八 */
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
+            width: 130px;
+            height: 130px;
+            /* 使用小八顏文字替代，或您可以之後替換成您本地的圖片檔名 */
             background-color: white;
-            border: 4px solid var(--blue);
+            border: 5px solid var(--blue);
             border-radius: 50%;
             cursor: pointer;
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             box-shadow: 0 6px 0 var(--blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
             transition: transform 0.1s;
+        }
+        /* 這裡用背景圖示範，如果圖片失效會顯示底色 */
+        .quiz-hachiware::before {
+            content: "🐱"; /* 先用 emoji 墊底，確保一定有東西看 */
+            position: absolute;
         }
         .quiz-hachiware:active { transform: scale(0.9) translateY(4px); box-shadow: 0 2px 0 var(--blue); }
         
         .hachiware-hint {
             position: absolute;
-            bottom: -25px;
+            bottom: -30px;
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
-            font-size: 0.8rem;
-            color: #999;
+            font-size: 0.9rem;
+            color: #777;
             font-weight: bold;
+            background: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
         }
 
         .item-grid { display: grid; gap: 10px; width: 95%; max-width: 800px; }
@@ -112,7 +121,7 @@
             'か': [{k:'か', r:'ka'},{k:'き', r:'ki'},{k:'く', r:'ku'},{k:'け', r:'ke'},{k:'こ', r:'ko'}],
             'さ': [{k:'さ', r:'sa'},{k:'し', r:'shi'},{k:'す', r:'su'},{k:'せ', r:'se'},{k:'そ', r:'so'}],
             'た': [{k:'た', r:'ta'},{k:'ち', r:'chi'},{k:'つ', r:'tsu'},{k:'て', r:'te'},{k:'と', r:'to'}],
-            'な': [{k:'な', r:'na'},{k:'に', r:'ni'},{k:'ぬ', r:'nu'},{k:'ね', r:'ne'},{k:'の', r:'no'}]
+            'な': [{k:'な', r:'に', r:'ni'},{k:'に', r:'ni'},{k:'ぬ', r:'nu'},{k:'ね', r:'ne'},{k:'の', r:'no'}]
         };
 
         let currentMode = 'study', activeRows = ['あ'], correctCount = 0, target = {}, isAnswering = false;
@@ -170,9 +179,11 @@
                 grid.classList.add('grid-quiz');
                 target = currentList[Math.floor(Math.random() * currentList.length)];
                 
-                // --- 修改處：題目區域換成小八按鈕 ---
                 const hachiwareContainer = document.createElement('div');
                 hachiwareContainer.className = 'quiz-hachiware';
+                // 這裡加入圖片，如果失效請檢查您的本地路徑
+                hachiwareContainer.style.backgroundImage = "url('hachiware.png')"; 
+                hachiwareContainer.style.backgroundSize = "cover";
                 hachiwareContainer.innerHTML = `<div class="hachiware-hint">點我重聽一次</div>`;
                 hachiwareContainer.onclick = () => speak(target.k);
                 stage.appendChild(hachiwareContainer);
