@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>五十音冒險 Ver 3.3.0</title>
+    <title>五十音冒險 Ver 3.4.0</title>
     <style>
         :root {
             --pink: #FFD1DC;
@@ -11,6 +11,7 @@
             --yellow: #FFF4BD;
             --text: #5d4037;
             --white: #ffffff;
+            --soft-bg: #FFFBFA;
         }
 
         * {
@@ -22,86 +23,77 @@
 
         body {
             margin: 0; padding: 0;
-            background-color: #FFFBFA;
-            background-image: radial-gradient(var(--pink) 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-color: var(--soft-bg);
+            background-image: radial-gradient(var(--pink) 1.5px, transparent 1.5px);
+            background-size: 25px 25px;
             display: flex; flex-direction: column; align-items: center;
-            height: 100vh; overflow: hidden;
+            min-height: 100vh;
         }
 
         /* 導覽列 */
         .nav-header {
-            width: 100%; background: white; padding: 10px 15px;
+            width: 100%; background: white; padding: 12px 15px;
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 3px solid var(--pink);
-            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
         }
 
         .btn-home {
-            text-decoration: none; background: var(--yellow); padding: 8px 15px;
-            border-radius: 20px; font-weight: bold; font-size: 0.9rem;
-            border: 2px solid var(--text);
+            text-decoration: none; background: var(--yellow); padding: 8px 18px;
+            border-radius: 50px; font-weight: bold; font-size: 0.95rem;
+            border: 2.5px solid var(--text);
         }
 
-        /* 模式切換 */
-        .mode-selector {
-            display: flex; gap: 10px; margin: 15px 0;
+        /* 模式與範圍選擇 */
+        .control-panel {
+            width: 95%; max-width: 500px; padding: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 20px; margin-top: 10px;
         }
 
+        .mode-selector { display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; }
         .mode-btn {
-            padding: 8px 20px; border-radius: 20px; border: 2px solid var(--pink);
-            background: white; font-weight: bold; cursor: pointer;
+            flex: 1; padding: 10px; border-radius: 15px; border: 2.5px solid var(--pink);
+            background: white; font-weight: bold; font-size: 1rem;
         }
-
         .mode-btn.active { background: var(--pink); color: white; }
 
-        /* 行選擇器 */
-        .row-selector {
-            display: flex; gap: 8px; overflow-x: auto; width: 100%; padding: 10px;
-            scrollbar-width: none;
-        }
+        .row-selector { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
         .row-btn {
-            flex-shrink: 0; padding: 5px 15px; background: white;
-            border: 2px solid var(--blue); border-radius: 15px; font-weight: bold;
+            padding: 6px 14px; background: white; border: 2px solid var(--blue);
+            border-radius: 12px; font-weight: bold; font-size: 0.9rem;
         }
-        .row-btn.active { background: var(--blue); }
+        .row-btn.active { background: var(--blue); border-color: #89cff0; }
 
-        /* 遊戲與學習區域 */
+        /* 主舞台 */
         #main-stage {
-            flex-grow: 1; width: 100%; position: relative;
-            display: flex; flex-direction: column; align-items: center;
+            width: 100%; max-width: 500px; flex-grow: 1;
+            padding: 20px; display: flex; flex-direction: column; align-items: center;
         }
 
-        /* 學習模式卡片 */
-        .study-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 15px; padding: 20px; width: 100%; max-width: 400px;
+        /* 測驗題目區 */
+        .quiz-card {
+            background: white; border: 6px solid var(--yellow); border-radius: 30px;
+            padding: 15px 40px; margin-bottom: 20px; text-align: center;
+            box-shadow: 0 8px 0 var(--yellow); min-width: 180px;
+        }
+        #target-kana { font-size: 4.5rem; font-weight: bold; margin: 5px 0; }
+
+        /* 卡片/方塊網格 (不重疊) */
+        .item-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 15px; width: 100%;
         }
 
-        .study-card {
-            background: white; border: 4px solid var(--yellow); border-radius: 20px;
-            padding: 20px 10px; text-align: center;
-            box-shadow: 0 5px 0 var(--yellow); cursor: pointer;
-            transition: transform 0.1s;
+        .game-item {
+            background: white; border-radius: 20px; border: 3px solid var(--blue);
+            padding: 25px 10px; text-align: center; font-size: 2.2rem;
+            font-weight: bold; box-shadow: 0 5px 0 var(--blue);
+            transition: transform 0.1s, box-shadow 0.1s;
         }
-        .study-card:active { transform: scale(0.95); }
-        .study-card .kana { font-size: 2rem; font-weight: bold; display: block; }
-        .study-card .roma { font-size: 0.9rem; color: #aaa; }
-
-        /* 測驗模式題目 */
-        .quiz-box {
-            background: white; border: 5px solid var(--pink); border-radius: 25px;
-            padding: 20px 40px; margin: 20px 0; text-align: center;
-        }
-        #target-kana { font-size: 3.5rem; font-weight: bold; }
-
-        .bubble {
-            position: absolute; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; font-weight: bold; color: white;
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
-            border: 2px solid white; cursor: pointer;
-        }
+        .game-item:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--blue); }
+        .game-item.study { border-color: var(--yellow); box-shadow: 0 5px 0 var(--yellow); }
+        .game-item .roma-hint { display: block; font-size: 0.8rem; color: #bbb; margin-top: 5px; }
 
         .version-tag { position: fixed; bottom: 8px; right: 12px; font-size: 11px; opacity: 0.5; }
     </style>
@@ -110,112 +102,127 @@
 
     <div class="nav-header">
         <a href="https://liliancir0125.github.io/Rumi_Study_Hall/" class="btn-home">🏠 回大廳</a>
-        <div style="font-weight: bold; color: var(--pink);">得分: <span id="score">0</span></div>
+        <div style="font-weight: bold;">得分: <span id="score" style="color:#ff8fa3">0</span></div>
     </div>
 
-    <div class="mode-selector">
-        <button class="mode-btn active" id="btn-study" onclick="switchMode('study')">📖 練習模式</button>
-        <button class="mode-btn" id="btn-quiz" onclick="switchMode('quiz')">🎮 挑戰模式</button>
+    <div class="control-panel">
+        <div class="mode-selector">
+            <button class="mode-btn active" id="btn-study" onclick="setMode('study')">📖 認字練習</button>
+            <button class="mode-btn" id="btn-quiz" onclick="setMode('quiz')">🎮 挑戰開始</button>
+        </div>
+        <div class="row-selector" id="row-btns"></div>
     </div>
 
-    <div class="row-selector" id="row-btns">
-        </div>
+    <div id="main-stage"></div>
 
-    <div id="main-stage">
-        </div>
-
-    <div class="version-tag">Ver. 3.3.0</div>
+    <div class="version-tag">Ver. 3.4.0</div>
 
     <script>
-        const data = {
+        const kanaData = {
             'あ': [{k:'あ', r:'a'},{k:'い', r:'i'},{k:'う', r:'u'},{k:'え', r:'e'},{k:'お', r:'o'}],
             'か': [{k:'か', r:'ka'},{k:'き', r:'ki'},{k:'く', r:'ku'},{k:'け', r:'ke'},{k:'こ', r:'ko'}],
             'さ': [{k:'さ', r:'sa'},{k:'し', r:'shi'},{k:'す', r:'su'},{k:'せ', r:'se'},{k:'そ', r:'so'}],
-            'た': [{k:'た', r:'ta'},{k:'ち', r:'chi'},{k:'つ', r:'tsu'},{k:'て', r:'te'},{k:'と', r:'to'}]
+            'た': [{k:'た', r:'ta'},{k:'ち', r:'chi'},{k:'つ', r:'tsu'},{k:'て', r:'te'},{k:'と', r:'to'}],
+            'な': [{k:'な', r:'na'},{k:'に', r:'ni'},{k:'ぬ', r:'nu'},{k:'ね', r:'ne'},{k:'の', r:'no'}]
         };
         
-        let currentMode = 'study', currentRow = 'あ', score = 0, target = {};
-        const colors = ['#FFD1DC', '#BFEAF2', '#FFF4BD', '#FFDFD3', '#D0F0C0'];
+        let currentMode = 'study', activeRows = ['あ'], score = 0, target = {};
 
         function speak(t) {
             const ut = new SpeechSynthesisUtterance(t);
-            ut.lang = 'ja-JP'; ut.rate = 0.8;
+            ut.lang = 'ja-JP'; ut.rate = 0.9;
             window.speechSynthesis.speak(ut);
         }
 
-        function switchMode(m) {
+        function setMode(m) {
             currentMode = m;
             document.getElementById('btn-study').classList.toggle('active', m==='study');
             document.getElementById('btn-quiz').classList.toggle('active', m==='quiz');
-            renderStage();
+            render();
         }
 
-        function renderStage() {
+        function toggleRow(row) {
+            if (activeRows.includes(row)) {
+                if (activeRows.length > 1) activeRows = activeRows.filter(r => r !== row);
+            } else {
+                activeRows.push(row);
+            }
+            updateRowBtns();
+            render();
+        }
+
+        function updateRowBtns() {
+            const container = document.getElementById('row-btns');
+            container.innerHTML = '';
+            Object.keys(kanaData).forEach(row => {
+                const btn = document.createElement('button');
+                btn.className = 'row-btn' + (activeRows.includes(row) ? ' active' : '');
+                btn.innerText = row + ' 行';
+                btn.onclick = () => toggleRow(row);
+                container.appendChild(btn);
+            });
+        }
+
+        function render() {
             const stage = document.getElementById('main-stage');
             stage.innerHTML = '';
-            const list = data[currentRow];
+            let currentList = [];
+            activeRows.forEach(row => currentList = currentList.concat(kanaData[row]));
 
-            if(currentMode === 'study') {
+            if (currentMode === 'study') {
                 const grid = document.createElement('div');
-                grid.className = 'study-grid';
-                list.forEach(item => {
+                grid.className = 'item-grid';
+                currentList.forEach(item => {
                     const card = document.createElement('div');
-                    card.className = 'study-card';
-                    card.innerHTML = `<span class="kana">${item.k}</span><span class="roma">${item.r}</span>`;
+                    card.className = 'game-item study';
+                    card.innerHTML = `${item.k}<span class="roma-hint">${item.r}</span>`;
                     card.onclick = () => speak(item.k);
                     grid.appendChild(card);
                 });
                 stage.appendChild(grid);
             } else {
-                const box = document.createElement('div');
-                box.className = 'quiz-box';
-                box.innerHTML = `<div style="font-size:0.8rem">找出這個音</div><div id="target-kana">?</div>`;
-                stage.appendChild(box);
-                newQuiz();
-                list.forEach((item, idx) => {
-                    const b = document.createElement('div');
-                    b.className = 'bubble'; b.innerText = item.r;
-                    b.style.width = '70px'; b.style.height = '70px';
-                    b.style.backgroundColor = colors[idx % colors.length];
-                    b.style.left = Math.random() * (window.innerWidth - 80) + 'px';
-                    b.style.top = (Math.random() * 200 + 150) + 'px';
-                    b.onclick = () => checkAnswer(item.r);
-                    stage.appendChild(b);
+                // 測驗模式
+                const quizCard = document.createElement('div');
+                quizCard.className = 'quiz-card';
+                quizCard.innerHTML = `<div style="font-size:0.9rem;opacity:0.6">這個怎麼讀？</div><div id="target-kana">?</div>`;
+                stage.appendChild(quizCard);
+                
+                const grid = document.createElement('div');
+                grid.className = 'item-grid';
+                // 測驗時隨機打亂選項
+                const shuffled = [...currentList].sort(() => Math.random() - 0.5);
+                shuffled.forEach(item => {
+                    const btn = document.createElement('div');
+                    btn.className = 'game-item';
+                    btn.innerText = item.r;
+                    btn.onclick = () => checkAnswer(item.r);
+                    grid.appendChild(btn);
                 });
+                stage.appendChild(grid);
+                newQuestion(currentList);
             }
         }
 
-        function newQuiz() {
-            const list = data[currentRow];
-            target = list[Math.floor(Math.random()*list.length)];
+        function newQuestion(list) {
+            target = list[Math.floor(Math.random() * list.length)];
             document.getElementById('target-kana').innerText = target.k;
             speak(target.k);
         }
 
-        function checkAnswer(r) {
-            if(r === target.r) {
-                score += 10; document.getElementById('score').innerText = score;
-                newQuiz();
-            } else { alert("不對喔！"); }
+        function checkAnswer(roma) {
+            if (roma === target.r) {
+                score += 10;
+                document.getElementById('score').innerText = score;
+                render(); // 答對直接刷新出新題
+            } else {
+                alert("不對喔！這個是 " + target.r);
+            }
         }
 
-        function init() {
-            const rb = document.getElementById('row-btns');
-            Object.keys(data).forEach(key => {
-                const b = document.createElement('button');
-                b.className = 'row-btn' + (key === currentRow ? ' active' : '');
-                b.innerText = key + ' 行';
-                b.onclick = () => {
-                    currentRow = key;
-                    Array.from(rb.children).forEach(c => c.classList.remove('active'));
-                    b.classList.add('active');
-                    renderStage();
-                };
-                rb.appendChild(b);
-            });
-            renderStage();
-        }
-        window.onload = init;
+        window.onload = () => {
+            updateRowBtns();
+            render();
+        };
     </script>
 </body>
 </html>
