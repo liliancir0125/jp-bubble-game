@@ -3,121 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>五十音冒險 Ver 3.4.1</title>
+    <title>五十音冒險 Ver 3.4.2</title>
     <style>
         :root {
             --pink: #FFD1DC;
             --blue: #BFEAF2;
             --yellow: #FFF4BD;
             --text: #5d4037;
-            --green: #c1e1c1;
-            --red: #ffb3ba;
-            --white: #ffffff;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: sans-serif; }
 
         body {
-            margin: 0; padding: 0;
-            background-color: #FFFBFA;
-            display: flex; flex-direction: column; align-items: center;
-            height: 100vh; overflow: hidden;
+            margin: 0; padding: 0; background-color: #FFFBFA;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
+        /* 導覽列 */
         .nav-header {
-            width: 100%; background: white; padding: 10px 15px;
+            width: 100%; background: white; padding: 12px;
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 3px solid var(--pink);
-            flex-shrink: 0;
+            border-bottom: 3px solid var(--pink); flex-shrink: 0;
         }
 
         .btn-home {
-            text-decoration: none; background: var(--yellow); padding: 8px 15px;
-            border-radius: 20px; font-weight: bold; border: 2.5px solid var(--text);
-            font-size: 0.9rem;
+            text-decoration: none; background: var(--yellow); padding: 10px 20px;
+            border-radius: 25px; font-weight: bold; border: 2.5px solid var(--text);
+            font-size: 1.1rem; color: var(--text);
         }
 
-        .count-display { font-weight: bold; font-size: 1.1rem; color: var(--text); }
-
-        /* 頂部控制面板 */
+        /* 控制區：字體加大 */
         .control-panel {
             width: 100%; padding: 10px; background: #fff;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
         }
 
-        .mode-selector { display: flex; gap: 10px; }
+        .mode-selector { display: flex; gap: 15px; width: 90%; }
         .mode-btn {
-            padding: 6px 15px; border-radius: 15px; border: 2px solid var(--pink);
-            background: white; font-weight: bold;
+            flex: 1; padding: 12px; border-radius: 15px; border: 3px solid var(--pink);
+            background: white; font-weight: bold; font-size: 1.3rem; color: var(--text);
         }
         .mode-btn.active { background: var(--pink); color: white; }
 
-        .row-selector { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+        .row-selector { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
         .row-btn {
-            padding: 4px 10px; background: white; border: 2px solid var(--blue);
-            border-radius: 10px; font-size: 0.85rem; font-weight: bold;
+            padding: 8px 16px; background: white; border: 2.5px solid var(--blue);
+            border-radius: 12px; font-size: 1.1rem; font-weight: bold; color: var(--text);
         }
         .row-btn.active { background: var(--blue); }
 
         /* 遊戲區 */
         #main-stage {
-            flex-grow: 1; width: 100%; max-width: 500px;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 10px; overflow-y: auto;
+            flex-grow: 1; width: 100%; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; padding: 15px;
         }
 
+        /* 題目卡 */
         .quiz-card {
-            background: white; border: 6px solid var(--yellow); border-radius: 25px;
-            padding: 10px 40px; margin-bottom: 15px; text-align: center;
-            box-shadow: 0 6px 0 var(--yellow);
+            background: white; border: 8px solid var(--yellow); border-radius: 30px;
+            padding: 20px 50px; margin-bottom: 30px; text-align: center;
+            box-shadow: 0 8px 0 var(--yellow);
         }
-        #target-kana { font-size: 4rem; font-weight: bold; color: var(--text); }
+        #target-kana { font-size: 6rem; font-weight: bold; color: var(--text); line-height: 1; }
 
+        /* 四選一按鈕網格 */
         .item-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 12px; width: 100%; padding-bottom: 20px;
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 20px; width: 100%; max-width: 400px;
         }
 
         .game-item {
-            background: white; border-radius: 18px; border: 3px solid var(--blue);
-            padding: 20px 5px; text-align: center; font-size: 1.8rem;
-            font-weight: bold; box-shadow: 0 4px 0 var(--blue);
+            background: white; border-radius: 25px; border: 4px solid var(--blue);
+            padding: 35px 10px; text-align: center; font-size: 3rem;
+            font-weight: bold; color: var(--text); box-shadow: 0 6px 0 var(--blue);
             transition: transform 0.1s; cursor: pointer;
         }
         .game-item:active { transform: scale(0.9); }
-        .game-item.study { border-color: var(--pink); box-shadow: 0 4px 0 var(--pink); }
+        .game-item.study { border-color: var(--pink); box-shadow: 0 6px 0 var(--pink); font-size: 3rem; }
+        .study-roma { font-size: 1.2rem; color: #999; display: block; }
 
-        /* 彈出提示 */
+        /* 提示動畫 */
         #feedback {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 3rem; font-weight: bold; z-index: 200;
-            pointer-events: none; opacity: 0;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+            font-size: 4rem; font-weight: bold; z-index: 200; pointer-events: none; opacity: 0;
         }
         .pop-feedback { animation: pop 0.8s ease-out; }
         @keyframes pop {
             0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
         }
 
-        .version-tag { position: fixed; bottom: 5px; right: 10px; font-size: 10px; opacity: 0.4; }
+        .version-tag { position: fixed; bottom: 8px; right: 12px; font-size: 11px; opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <div class="nav-header">
         <a href="https://liliancir0125.github.io/Rumi_Study_Hall/" class="btn-home">🏠 回大廳</a>
-        <div class="count-display">答對: <span id="correct-count">0</span> 題</div>
+        <div style="font-weight: bold; font-size: 1.2rem;">答對: <span id="correct-count" style="color:#ff8fa3">0</span></div>
     </div>
 
     <div class="control-panel">
         <div class="mode-selector">
-            <button class="mode-btn active" id="btn-study" onclick="setMode('study')">認字練習</button>
+            <button class="mode-btn active" id="btn-study" onclick="setMode('study')">認識練習</button>
             <button class="mode-btn" id="btn-quiz" onclick="setMode('quiz')">挑戰測驗</button>
         </div>
         <div class="row-selector" id="row-btns"></div>
@@ -125,7 +114,7 @@
 
     <div id="main-stage"></div>
     <div id="feedback"></div>
-    <div class="version-tag">Ver. 3.4.1</div>
+    <div class="version-tag">Ver. 3.4.2</div>
 
     <script>
         const kanaData = {
@@ -140,7 +129,7 @@
 
         function speak(t, lang='ja-JP') {
             const ut = new SpeechSynthesisUtterance(t);
-            ut.lang = lang; ut.rate = 0.9;
+            ut.lang = lang; ut.rate = 0.8;
             window.speechSynthesis.speak(ut);
         }
 
@@ -152,9 +141,8 @@
         }
 
         function toggleRow(row) {
-            if (activeRows.includes(row)) {
-                if (activeRows.length > 1) activeRows = activeRows.filter(r => r !== row);
-            } else { activeRows.push(row); }
+            // 在此版本強制單選一行，測驗時選項才不會混亂
+            activeRows = [row];
             updateRowBtns(); render();
         }
 
@@ -173,8 +161,7 @@
         function render() {
             const stage = document.getElementById('main-stage');
             stage.innerHTML = '';
-            let currentList = [];
-            activeRows.forEach(row => currentList = currentList.concat(kanaData[row]));
+            let currentList = kanaData[activeRows[0]];
 
             if (currentMode === 'study') {
                 const grid = document.createElement('div');
@@ -182,21 +169,34 @@
                 currentList.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'game-item study';
-                    card.innerHTML = `${item.k}<div style="font-size:0.8rem;color:#999">${item.r}</div>`;
+                    card.innerHTML = `${item.k}<span class="study-roma">${item.r}</span>`;
                     card.onclick = () => speak(item.k);
                     grid.appendChild(card);
                 });
                 stage.appendChild(grid);
             } else {
+                // 測驗模式：題目大字
                 const qCard = document.createElement('div');
                 qCard.className = 'quiz-card';
                 qCard.innerHTML = `<div id="target-kana">?</div>`;
                 stage.appendChild(qCard);
                 
+                // 選項：只從同一行挑 4 個
                 const grid = document.createElement('div');
                 grid.className = 'item-grid';
-                const shuffled = [...currentList].sort(() => Math.random() - 0.5);
-                shuffled.forEach(item => {
+                
+                target = currentList[Math.floor(Math.random() * currentList.length)];
+                document.getElementById('target-kana').innerText = target.k;
+                speak(target.k);
+
+                // 挑選 4 個選項（包含正確答案）
+                let options = [target];
+                let others = currentList.filter(i => i.r !== target.r);
+                others.sort(() => Math.random() - 0.5);
+                options = options.concat(others.slice(0, 3));
+                options.sort(() => Math.random() - 0.5);
+
+                options.forEach(item => {
                     const btn = document.createElement('div');
                     btn.className = 'game-item';
                     btn.innerText = item.r;
@@ -204,23 +204,14 @@
                     grid.appendChild(btn);
                 });
                 stage.appendChild(grid);
-                newQuestion(currentList);
             }
-        }
-
-        function newQuestion(list) {
-            target = list[Math.floor(Math.random() * list.length)];
-            document.getElementById('target-kana').innerText = target.k;
-            speak(target.k);
         }
 
         function showFeedback(text, color) {
             const fb = document.getElementById('feedback');
-            fb.innerText = text;
-            fb.style.color = color;
-            fb.className = '';
-            void fb.offsetWidth; // 觸發重繪
+            fb.innerText = text; fb.style.color = color;
             fb.className = 'pop-feedback';
+            setTimeout(() => fb.className = '', 800);
         }
 
         function checkAnswer(roma) {
@@ -228,11 +219,9 @@
                 correctCount++;
                 document.getElementById('correct-count').innerText = correctCount;
                 showFeedback("⭐ 答對了！", "#77dd77");
-                speak("正解", 'ja-JP');
                 setTimeout(render, 800);
             } else {
                 showFeedback("❌ 再試一次", "#ff6961");
-                speak("間違い", 'ja-JP');
             }
         }
 
