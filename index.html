@@ -1,197 +1,148 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>五十音冒險 v3.1 - 自主選關版</title>
+    <title>五十音冒險 Ver 3.2.0</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #E8F5E9; font-family: 'Arial', 'Hiragino Kaku Gothic Pro', sans-serif; touch-action: manipulation; }
-        
-        /* 選單畫面 */
-        #menu-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 500; display: flex; flex-direction: column; align-items: center; padding: 20px;
+        :root {
+            --pink: #FFD1DC; /* 夢幻粉 */
+            --blue: #BFEAF2; /* 粉藍 */
+            --yellow: #FFF4BD; /* 鵝黃 */
+            --text-color: #7B5E57; /* 暖咖啡色文字 */
+            --bg-color: #FFFBFA;
         }
-        .row-selector {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin: 20px 0;
-        }
-        .row-btn {
-            padding: 15px 25px; font-size: 20px; border: 3px solid #4CAF50; border-radius: 15px;
-            background: white; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #388E3C;
-        }
-        .row-btn.selected { background: #4CAF50; color: white; transform: translateY(4px); box-shadow: none; }
 
-        /* 學習畫面 */
-        #study-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #FFFDE7; z-index: 400; display: none; flex-direction: column; align-items: center; padding: 20px;
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden;
+            color: var(--text-color);
         }
-        .kana-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
-        .kana-card { 
-            width: 65px; height: 65px; background: white; border: 2px solid #FFB74D; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer;
-            box-shadow: 0 4px 0 #FFA000;
-        }
-        .kana-card:active { transform: translateY(2px); box-shadow: 0 2px 0 #FFA000; }
 
-        /* 遊戲介面 */
-        #ui-panel { position: absolute; top: 20px; width: 100%; text-align: center; z-index: 100; display: none; pointer-events: none; }
-        #listen-btn {
-            pointer-events: auto; font-size: 50px; background: white; border: 5px solid #2196F3;
-            border-radius: 50%; width: 100px; height: 100px; cursor: pointer; box-shadow: 0 6px 0 #1976D2;
+        /* 頂部控制列 */
+        .nav-header {
+            width: 100%; background: white; padding: 10px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 3px solid var(--pink);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 100;
         }
-        #listen-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #1976D2; }
+
+        .btn-home {
+            text-decoration: none; background: var(--yellow); padding: 8px 15px;
+            border-radius: 20px; font-weight: bold; font-size: 0.9rem;
+            border: 2px solid var(--text-color);
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        /* 遊戲區域 */
+        #game-container {
+            flex-grow: 1; width: 100%; position: relative;
+            background: radial-gradient(circle, #ffffff 0%, var(--bg-color) 100%);
+            touch-action: none;
+        }
 
         .bubble {
-            position: absolute; width: 90px; height: 90px;
-            background: radial-gradient(circle at 30% 30%, #fff, #81D4FA);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 35px; font-weight: bold; color: #01579B; animation: float 10s linear infinite;
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+            position: absolute; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: bold; color: white;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.05);
+            cursor: pointer; transition: transform 0.1s;
+            border: 2px solid rgba(255,255,255,0.5);
         }
-        @keyframes float { 0% { transform: translateY(110vh); } 100% { transform: translateY(-20vh); } }
-        
-        .nav-btn { margin-top: 30px; padding: 15px 40px; font-size: 24px; background: #FF7043; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 0 #E64A19; }
-        .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #E64A19; }
 
-        #version-tag { position: fixed; bottom: 5px; right: 10px; font-size: 12px; color: #ccc; }
+        /* 問題看板 */
+        .quiz-card {
+            background: white; border: 5px solid var(--yellow);
+            border-radius: 25px; padding: 15px 30px; margin-top: 20px;
+            box-shadow: 0 8px 0 var(--yellow); text-align: center;
+        }
+
+        #target-kana { font-size: 3rem; font-weight: bold; color: var(--text-color); }
+        
+        .score-board { font-weight: bold; font-size: 1.2rem; color: #FFB7C5; }
+
+        .version-tag { position: fixed; bottom: 8px; right: 12px; font-size: 11px; opacity: 0.5; }
     </style>
 </head>
 <body>
 
-<div id="version-tag">v3.1</div>
-
-<div id="menu-screen">
-    <h1 style="color: #2E7D32;">🎮 五十音大冒險</h1>
-    <p>你想練習哪幾行朋友？</p>
-    <div class="row-selector">
-        <div class="row-btn" onclick="toggleRow(this, 'あ')">あ 行</div>
-        <div class="row-btn" onclick="toggleRow(this, 'か')">か 行</div>
-        <div class="row-btn" onclick="toggleRow(this, 'さ')">さ 行</div>
-        <div class="row-btn" onclick="toggleRow(this, 'た')">た 行</div>
-        <div class="row-btn" onclick="toggleRow(this, 'な')">な 行</div>
+    <div class="nav-header">
+        <a href="https://liliancir0125.github.io/Rumi_Study_Hall/" class="btn-home">🏠 回大廳</a>
+        <div class="score-board">得分: <span id="score">0</span></div>
     </div>
-    <button class="nav-btn" onclick="goToStudy()">選好了，去練習！</button>
-</div>
 
-<div id="study-screen">
-    <h2 id="study-title" style="color: #F57C00;">點點看，記住聲音喔！</h2>
-    <div class="kana-grid" id="study-grid"></div>
-    <button class="nav-btn" style="background:#4CAF50; box-shadow: 0 5px 0 #388E3C;" onclick="startChallenge()">記好了，開始比賽！</button>
-    <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; text-decoration:underline;">重新選行</button>
-</div>
+    <div class="quiz-card">
+        <div style="font-size: 0.9rem;">請找出這個發音：</div>
+        <div id="target-kana">あ</div>
+    </div>
 
-<div id="ui-panel">
-    <button id="listen-btn" onclick="speak(currentTarget)">👂</button>
-    <p style="font-weight: bold; color: #1565C0; margin-top:10px;">聽聲音，抓泡泡！</p>
-    <button onclick="location.reload()" style="pointer-events:auto; position:fixed; top:15px; right:15px; padding:10px; border-radius:10px; background:white; border:1px solid #ccc;">重選</button>
-</div>
-<div id="game-container"></div>
+    <div id="game-container"></div>
 
-<script>
-    const kanaMap = {
-        'あ': ['あ','い','う','え','お'],
-        'か': ['か','き','く','け','こ'],
-        'さ': ['さ','し','迷','せ','そ'], // 修正一個小地方
-        'さ': ['さ','し','す','せ','そ'],
-        'た': ['た','ち','つ','て','と'],
-        'な': ['な','に','ぬ','ne','の'], // 修正：ぬ、ね、の
-        'な': ['な','に','ぬ','ね','の']
-    };
-    
-    let selectedRows = [];
-    let activeKanaList = [];
-    let currentTarget = "";
-    let gameInterval;
-    const synth = window.speechSynthesis;
+    <div class="version-tag">Ver. 3.2.0</div>
 
-    function toggleRow(btn, rowKey) {
-        btn.classList.toggle('selected');
-        if (selectedRows.includes(rowKey)) {
-            selectedRows = selectedRows.filter(r => r !== rowKey);
-        } else {
-            selectedRows.push(rowKey);
+    <script>
+        const kanaList = [
+            {k: 'あ', r: 'a'}, {k: 'い', r: 'i'}, {k: 'う', r: 'u'}, {k: 'え', r: 'e'}, {k: 'お', r: 'o'},
+            {k: 'か', r: 'ka'}, {k: 'き', r: 'ki'}, {k: 'く', r: 'ku'}, {k: 'け', r: 'ke'}, {k: 'こ', r: 'ko'}
+        ];
+        const colors = ['#FFD1DC', '#BFEAF2', '#FFF4BD', '#FFDFD3', '#D0F0C0'];
+        
+        let score = 0;
+        let target = {};
+        const container = document.getElementById('game-container');
+
+        function initGame() {
+            spawnBubbles();
+            newQuiz();
         }
-    }
 
-    function goToStudy() {
-        if (selectedRows.length === 0) {
-            alert("請先選擇要練習的行喔！");
-            return;
+        function newQuiz() {
+            target = kanaList[Math.floor(Math.random() * kanaList.length)];
+            document.getElementById('target-kana').innerText = target.k;
         }
-        activeKanaList = [];
-        selectedRows.forEach(row => {
-            activeKanaList = activeKanaList.concat(kanaMap[row]);
-        });
 
-        document.getElementById('menu-screen').style.display = 'none';
-        document.getElementById('study-screen').style.display = 'flex';
-        
-        const grid = document.getElementById('study-grid');
-        grid.innerHTML = '';
-        activeKanaList.forEach(k => {
-            const div = document.createElement('div');
-            div.className = 'kana-card';
-            div.innerText = k;
-            div.onclick = () => speak(k);
-            grid.appendChild(div);
-        });
-    }
+        function spawnBubbles() {
+            container.innerHTML = '';
+            kanaList.forEach((item, index) => {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.innerText = item.r;
+                
+                // 隨機顏色與位置
+                const size = 80;
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.backgroundColor = colors[index % colors.length];
+                bubble.style.left = Math.random() * (window.innerWidth - size) + 'px';
+                bubble.style.top = Math.random() * (container.offsetHeight - size) + 'px';
 
-    function speak(text) {
-        if (!text) return;
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'ja-JP';
-        utter.rate = 0.75;
-        synth.speak(utter);
-    }
+                bubble.onclick = () => {
+                    if (item.r === target.r) {
+                        score += 10;
+                        document.getElementById('score').innerText = score;
+                        bubble.style.transform = 'scale(1.5)';
+                        bubble.style.opacity = '0';
+                        setTimeout(() => {
+                            bubble.style.transform = 'scale(1)';
+                            bubble.style.opacity = '1';
+                            bubble.style.left = Math.random() * (window.innerWidth - size) + 'px';
+                            bubble.style.top = Math.random() * (container.offsetHeight - size) + 'px';
+                            newQuiz();
+                        }, 300);
+                    } else {
+                        bubble.style.transform = 'shake 0.5s';
+                        alert("不對喔！這是 " + item.r);
+                    }
+                };
+                container.appendChild(bubble);
+            });
+        }
 
-    function startChallenge() {
-        document.getElementById('study-screen').style.display = 'none';
-        document.getElementById('ui-panel').style.display = 'block';
-        nextRound();
-        gameInterval = setInterval(createBubble, 1800);
-    }
-
-    function nextRound() {
-        currentTarget = activeKanaList[Math.floor(Math.random() * activeKanaList.length)];
-        setTimeout(() => speak(currentTarget), 500);
-    }
-
-    function createBubble() {
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        
-        // 確保題目字出現的機率高一點
-        const isTarget = Math.random() > 0.4;
-        const char = isTarget ? currentTarget : activeKanaList[Math.floor(Math.random() * activeKanaList.length)];
-        
-        bubble.innerText = char;
-        bubble.style.left = Math.random() * 75 + 10 + "vw";
-        
-        bubble.onclick = function() {
-            if (char === currentTarget) {
-                bubble.style.background = '#A5D6A7';
-                bubble.style.transform = 'scale(1.3)';
-                bubble.style.transition = '0.2s';
-                setTimeout(() => {
-                    if(bubble.parentNode) bubble.remove();
-                    nextRound();
-                }, 200);
-            } else {
-                bubble.style.background = '#EF9A9A';
-                // 點錯抖動一下
-                bubble.style.transform = 'translateX(5px)';
-                setTimeout(()=> bubble.style.transform = 'translateX(-5px)', 50);
-                speak(currentTarget); // 再提示一次正確讀音
-            }
-        };
-        
-        document.getElementById('game-container').appendChild(bubble);
-        
-        // 泡泡飄太高自動消失
-        setTimeout(() => { if(bubble.parentNode) bubble.remove(); }, 11000);
-    }
-</script>
+        window.onload = initGame;
+    </script>
 </body>
 </html>
