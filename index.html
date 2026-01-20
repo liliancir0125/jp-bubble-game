@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>五十音冒險 Ver 3.2.2</title>
+    <title>五十音冒險 Ver 3.3.0</title>
     <style>
         :root {
-            --pink: #FFD1DC; /* 夢幻粉 */
-            --blue: #BFEAF2; /* 粉藍 */
-            --yellow: #FFF4BD; /* 鵝黃 */
-            --text: #5d4037; /* 暖咖啡色 */
-            --bg: #FFFBFA;
+            --pink: #FFD1DC;
+            --blue: #BFEAF2;
+            --yellow: #FFF4BD;
+            --text: #5d4037;
+            --white: #ffffff;
         }
 
         * {
@@ -22,14 +22,14 @@
 
         body {
             margin: 0; padding: 0;
-            background-color: var(--bg);
+            background-color: #FFFBFA;
             background-image: radial-gradient(var(--pink) 1px, transparent 1px);
             background-size: 30px 30px;
             display: flex; flex-direction: column; align-items: center;
             height: 100vh; overflow: hidden;
         }
 
-        /* 頂部導覽列 */
+        /* 導覽列 */
         .nav-header {
             width: 100%; background: white; padding: 10px 15px;
             display: flex; justify-content: space-between; align-items: center;
@@ -41,131 +41,181 @@
             text-decoration: none; background: var(--yellow); padding: 8px 15px;
             border-radius: 20px; font-weight: bold; font-size: 0.9rem;
             border: 2px solid var(--text);
-            display: flex; align-items: center; gap: 5px;
         }
 
-        .score-board { font-weight: bold; font-size: 1.1rem; color: #ff8fa3; }
-
-        /* 題目看板 */
-        .quiz-card {
-            background: white; border: 5px solid var(--yellow);
-            border-radius: 25px; padding: 10px 30px; margin: 15px 0;
-            box-shadow: 0 5px 0 var(--yellow); text-align: center;
-            z-index: 50;
+        /* 模式切換 */
+        .mode-selector {
+            display: flex; gap: 10px; margin: 15px 0;
         }
 
-        #target-kana { font-size: 3rem; font-weight: bold; }
+        .mode-btn {
+            padding: 8px 20px; border-radius: 20px; border: 2px solid var(--pink);
+            background: white; font-weight: bold; cursor: pointer;
+        }
 
-        /* 遊戲區域 */
-        #game-container {
+        .mode-btn.active { background: var(--pink); color: white; }
+
+        /* 行選擇器 */
+        .row-selector {
+            display: flex; gap: 8px; overflow-x: auto; width: 100%; padding: 10px;
+            scrollbar-width: none;
+        }
+        .row-btn {
+            flex-shrink: 0; padding: 5px 15px; background: white;
+            border: 2px solid var(--blue); border-radius: 15px; font-weight: bold;
+        }
+        .row-btn.active { background: var(--blue); }
+
+        /* 遊戲與學習區域 */
+        #main-stage {
             flex-grow: 1; width: 100%; position: relative;
-            touch-action: none; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
         }
+
+        /* 學習模式卡片 */
+        .study-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 15px; padding: 20px; width: 100%; max-width: 400px;
+        }
+
+        .study-card {
+            background: white; border: 4px solid var(--yellow); border-radius: 20px;
+            padding: 20px 10px; text-align: center;
+            box-shadow: 0 5px 0 var(--yellow); cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .study-card:active { transform: scale(0.95); }
+        .study-card .kana { font-size: 2rem; font-weight: bold; display: block; }
+        .study-card .roma { font-size: 0.9rem; color: #aaa; }
+
+        /* 測驗模式題目 */
+        .quiz-box {
+            background: white; border: 5px solid var(--pink); border-radius: 25px;
+            padding: 20px 40px; margin: 20px 0; text-align: center;
+        }
+        #target-kana { font-size: 3.5rem; font-weight: bold; }
 
         .bubble {
             position: absolute; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; font-weight: bold; color: white;
-            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
-            cursor: pointer; border: 2px solid rgba(255,255,255,0.8);
-            user-select: none;
+            font-size: 1.5rem; font-weight: bold; color: white;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+            border: 2px solid white; cursor: pointer;
         }
 
-        /* 版本號 */
-        .version-tag {
-            position: fixed; bottom: 8px; right: 12px;
-            font-size: 11px; opacity: 0.5;
-            background: rgba(255,255,255,0.7);
-            padding: 2px 6px; border-radius: 4px;
-        }
+        .version-tag { position: fixed; bottom: 8px; right: 12px; font-size: 11px; opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <div class="nav-header">
         <a href="https://liliancir0125.github.io/Rumi_Study_Hall/" class="btn-home">🏠 回大廳</a>
-        <div class="score-board">得分: <span id="score">0</span></div>
+        <div style="font-weight: bold; color: var(--pink);">得分: <span id="score">0</span></div>
     </div>
 
-    <div class="quiz-card">
-        <div style="font-size: 0.8rem; opacity: 0.7;">請找出這個發音：</div>
-        <div id="target-kana">あ</div>
+    <div class="mode-selector">
+        <button class="mode-btn active" id="btn-study" onclick="switchMode('study')">📖 練習模式</button>
+        <button class="mode-btn" id="btn-quiz" onclick="switchMode('quiz')">🎮 挑戰模式</button>
     </div>
 
-    <div id="game-container"></div>
+    <div class="row-selector" id="row-btns">
+        </div>
 
-    <div class="version-tag">Ver. 3.2.2</div>
+    <div id="main-stage">
+        </div>
+
+    <div class="version-tag">Ver. 3.3.0</div>
 
     <script>
-        const kanaList = [
-            {k: 'あ', r: 'a'}, {k: 'い', r: 'i'}, {k: 'う', r: 'u'}, {k: 'え', r: 'e'}, {k: 'お', r: 'o'},
-            {k: 'か', r: 'ka'}, {k: 'き', r: 'ki'}, {k: 'く', r: 'ku'}, {k: 'け', r: 'ke'}, {k: 'こ', r: 'ko'},
-            {k: 'さ', r: 'sa'}, {k: 'し', r: 'shi'}, {k: 'す', r: 'su'}, {k: 'せ', r: 'se'}, {k: 'そ', r: 'so'}
-        ];
-        const colors = ['#FFD1DC', '#BFEAF2', '#FFF4BD', '#FFDFD3', '#D0F0C0', '#E0BBE4'];
+        const data = {
+            'あ': [{k:'あ', r:'a'},{k:'い', r:'i'},{k:'う', r:'u'},{k:'え', r:'e'},{k:'お', r:'o'}],
+            'か': [{k:'か', r:'ka'},{k:'き', r:'ki'},{k:'く', r:'ku'},{k:'け', r:'ke'},{k:'こ', r:'ko'}],
+            'さ': [{k:'さ', r:'sa'},{k:'し', r:'shi'},{k:'す', r:'su'},{k:'せ', r:'se'},{k:'そ', r:'so'}],
+            'た': [{k:'た', r:'ta'},{k:'ち', r:'chi'},{k:'つ', r:'tsu'},{k:'て', r:'te'},{k:'と', r:'to'}]
+        };
         
-        let score = 0;
-        let target = {};
-        const container = document.getElementById('game-container');
+        let currentMode = 'study', currentRow = 'あ', score = 0, target = {};
+        const colors = ['#FFD1DC', '#BFEAF2', '#FFF4BD', '#FFDFD3', '#D0F0C0'];
+
+        function speak(t) {
+            const ut = new SpeechSynthesisUtterance(t);
+            ut.lang = 'ja-JP'; ut.rate = 0.8;
+            window.speechSynthesis.speak(ut);
+        }
+
+        function switchMode(m) {
+            currentMode = m;
+            document.getElementById('btn-study').classList.toggle('active', m==='study');
+            document.getElementById('btn-quiz').classList.toggle('active', m==='quiz');
+            renderStage();
+        }
+
+        function renderStage() {
+            const stage = document.getElementById('main-stage');
+            stage.innerHTML = '';
+            const list = data[currentRow];
+
+            if(currentMode === 'study') {
+                const grid = document.createElement('div');
+                grid.className = 'study-grid';
+                list.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'study-card';
+                    card.innerHTML = `<span class="kana">${item.k}</span><span class="roma">${item.r}</span>`;
+                    card.onclick = () => speak(item.k);
+                    grid.appendChild(card);
+                });
+                stage.appendChild(grid);
+            } else {
+                const box = document.createElement('div');
+                box.className = 'quiz-box';
+                box.innerHTML = `<div style="font-size:0.8rem">找出這個音</div><div id="target-kana">?</div>`;
+                stage.appendChild(box);
+                newQuiz();
+                list.forEach((item, idx) => {
+                    const b = document.createElement('div');
+                    b.className = 'bubble'; b.innerText = item.r;
+                    b.style.width = '70px'; b.style.height = '70px';
+                    b.style.backgroundColor = colors[idx % colors.length];
+                    b.style.left = Math.random() * (window.innerWidth - 80) + 'px';
+                    b.style.top = (Math.random() * 200 + 150) + 'px';
+                    b.onclick = () => checkAnswer(item.r);
+                    stage.appendChild(b);
+                });
+            }
+        }
 
         function newQuiz() {
-            target = kanaList[Math.floor(Math.random() * kanaList.length)];
+            const list = data[currentRow];
+            target = list[Math.floor(Math.random()*list.length)];
             document.getElementById('target-kana').innerText = target.k;
+            speak(target.k);
         }
 
-        function createBubble(item) {
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            bubble.innerText = item.r;
-            
-            const size = 75;
-            bubble.style.width = size + 'px';
-            bubble.style.height = size + 'px';
-            bubble.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            
-            // 隨機位置
-            resetBubblePos(bubble, size);
-
-            bubble.onclick = (e) => {
-                e.stopPropagation();
-                if (item.r === target.r) {
-                    score += 10;
-                    document.getElementById('score').innerText = score;
-                    // 答對動畫
-                    bubble.style.transform = 'scale(0)';
-                    setTimeout(() => {
-                        resetBubblePos(bubble, size);
-                        bubble.style.transform = 'scale(1)';
-                        bubble.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                        newQuiz();
-                    }, 300);
-                } else {
-                    alert("不對喔！這是 " + item.r);
-                }
-            };
-            container.appendChild(bubble);
+        function checkAnswer(r) {
+            if(r === target.r) {
+                score += 10; document.getElementById('score').innerText = score;
+                newQuiz();
+            } else { alert("不對喔！"); }
         }
 
-        function resetBubblePos(el, size) {
-            const maxX = container.offsetWidth - size;
-            const maxY = container.offsetHeight - size;
-            el.style.left = Math.random() * maxX + 'px';
-            el.style.top = Math.random() * maxY + 'px';
+        function init() {
+            const rb = document.getElementById('row-btns');
+            Object.keys(data).forEach(key => {
+                const b = document.createElement('button');
+                b.className = 'row-btn' + (key === currentRow ? ' active' : '');
+                b.innerText = key + ' 行';
+                b.onclick = () => {
+                    currentRow = key;
+                    Array.from(rb.children).forEach(c => c.classList.remove('active'));
+                    b.classList.add('active');
+                    renderStage();
+                };
+                rb.appendChild(b);
+            });
+            renderStage();
         }
-
-        function initGame() {
-            container.innerHTML = '';
-            // 產生 10 個泡泡隨機出現
-            for(let i=0; i<12; i++) {
-                const randomKana = kanaList[Math.floor(Math.random() * kanaList.length)];
-                createBubble(randomKana);
-            }
-            newQuiz();
-        }
-
-        // 當視窗大小改變時重新整理位置，防止泡泡跑出去
-        window.onresize = initGame;
-        window.onload = initGame;
+        window.onload = init;
     </script>
 </body>
 </html>
