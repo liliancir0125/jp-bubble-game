@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>五十音冒險 Ver 3.5.0</title>
+    <title>五十音冒險 Ver 3.5.1</title>
     <style>
         :root { --pink: #FFD1DC; --blue: #BFEAF2; --yellow: #FFF4BD; --text: #5d4037; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: sans-serif; }
@@ -37,16 +37,10 @@
         .quiz-audio-btn:active { transform: scale(0.9); }
 
         .item-grid { display: grid; gap: 15px; width: 95%; max-width: 1100px; padding: 10px; }
-        
-        /* 平板橫向優化：認識模式 5 欄 */
         .grid-study { grid-template-columns: repeat(5, 1fr); } 
-        /* 平板橫向優化：測驗模式 4 欄並排 */
         .grid-quiz { grid-template-columns: repeat(4, 1fr); }
 
-        .game-item.study { 
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 12px; border-color: var(--pink); box-shadow: 0 4px 0 var(--pink);
-        }
+        .game-item.study { display: flex; flex-direction: column; align-items: center; padding: 12px; border-color: var(--pink); box-shadow: 0 4px 0 var(--pink); }
         .study-img { width: 100%; max-height: 140px; object-fit: contain; border-radius: 8px; margin-bottom: 10px; }
         .study-kana { font-size: 2rem; font-weight: bold; color: var(--text); }
         .study-roma { font-size: 1rem; color: #999; }
@@ -90,7 +84,7 @@
 
     <div id="main-stage"></div>
     <div id="feedback"></div>
-    <div class="version-tag">Ver. 3.5.0</div>
+    <div class="version-tag">Ver. 3.5.1</div>
 
     <script>
         const kanaData = {
@@ -98,21 +92,30 @@
             'か': [{k:'か', r:'ka'},{k:'き', r:'ki'},{k:'く', r:'ku'},{k:'け', r:'ke'},{k:'こ', r:'ko'}],
             'さ': [{k:'さ', r:'sa'},{k:'し', r:'shi'},{k:'す', r:'su'},{k:'せ', r:'se'},{k:'そ', r:'so'}],
             'た': [{k:'た', r:'ta'},{k:'ち', r:'chi'},{k:'つ', r:'tsu'},{k:'て', r:'te'},{k:'と', r:'to'}],
-            'な': [{k:'な', r:'na'},{k:'に', r:'ni'},{k:'ぬ', r:'nu'},{k:'ね', r:'ne'},{k:'の', r:'no'}]
+            'な': [{k:'な', r:'na'},{k:'ni', r:'ni'},{k:'ぬ', r:'nu'},{k:'ね', r:'ne'},{k:'の', r:'no'}]
         };
 
         let currentMode = 'study', activeRows = ['あ'], correctCount = 0, target = {}, isAnswering = false;
 
-        function speak(t) {
+        // 核心修改：唸單個音節時使用超慢速 (0.5)
+        function speakKana(t) {
+            window.speechSynthesis.cancel(); // 先停止之前的聲音，避免重疊
             const ut = new SpeechSynthesisUtterance(t);
-            ut.lang = 'ja-JP'; ut.rate = 0.65;
+            ut.lang = 'ja-JP'; 
+            ut.rate = 0.5; 
+            window.speechSynthesis.speak(ut);
+        }
+
+        // 唸整句話或回饋時使用正常速度 (1.0)
+        function speakSentence(t) {
+            const ut = new SpeechSynthesisUtterance(t);
+            ut.lang = 'ja-JP'; 
+            ut.rate = 1.0; 
             window.speechSynthesis.speak(ut);
         }
 
         function playSuccessSound() {
-            const ut = new SpeechSynthesisUtterance("正解です！おめでとう");
-            ut.lang = 'ja-JP'; ut.rate = 1.0;
-            window.speechSynthesis.speak(ut);
+            speakSentence("正解です！おめでとう");
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -170,7 +173,7 @@
                         <div class="study-kana">${item.k}</div>
                         <div class="study-roma">${item.r}</div>
                     `;
-                    card.onclick = () => speak(item.k);
+                    card.onclick = () => speakKana(item.k);
                     grid.appendChild(card);
                 });
                 stage.appendChild(grid);
@@ -179,9 +182,9 @@
                 target = combinedList[Math.floor(Math.random() * combinedList.length)];
                 const audioBtn = document.createElement('div');
                 audioBtn.className = 'quiz-audio-btn';
-                audioBtn.onclick = () => speak(target.k);
+                audioBtn.onclick = () => speakKana(target.k);
                 stage.appendChild(audioBtn);
-                setTimeout(() => speak(target.k), 300);
+                setTimeout(() => speakKana(target.k), 300);
 
                 let options = [target];
                 let others = combinedList.filter(i => i.k !== target.k);
@@ -218,7 +221,7 @@
                 setTimeout(render, 2500);
             } else {
                 showFeedback("❌ 再試一次", "#ff6961");
-                speak("ちがう"); 
+                speakSentence("ちがう"); 
             }
         }
 
